@@ -192,15 +192,20 @@ inline int min(int x, int y) {
 void fb_draw_line(int x1, int y1, int x2, int y2, int color)
 {
 /*---------------------------------------------------*/
-	int width = abs(x2 - x1);
-	int height = abs(y2 - y1);
-	int *buf = _begin_draw(min(x1, x2), min(y1, y2), width, height);
+	int miny = min(y1, y2);
+	int minx = min(x1, x2);
+	int maxy = y1 + y2 - miny;
+	int maxx = x1 + x2 - minx;
+	int width = maxx - minx;
+	int height = maxy - miny;
+	int *buf = _begin_draw(minx, miny, width, height);
+
 	if(!width) {
-		for(int i = min(y1, y2); i <= max(y1, y2); i++) {
+		for(int i = miny; i <= maxy; i++) {
 			buf[(i << SCREEN_WIDTH_BIT) | x1] = color;
 		}
 	} else if(!height) {
-		for(int i = min(x1, x2); i <= max(x1, x2); i++) {
+		for(int i = minx; i <= maxx; i++) {
 			buf[(y1 << SCREEN_WIDTH_BIT) | i] = color;
 		}
 	} else {
