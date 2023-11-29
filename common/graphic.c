@@ -255,33 +255,78 @@ void fb_draw_image(int x, int y, fb_image *image, int color)
 	int *buf = _begin_draw(x,y,w,h);
 /*---------------------------------------------------------------*/
 	char *dst = (char *)(buf + y*SCREEN_WIDTH + x);
-	char *src; //不同的图像颜色格式定位不同
+	char *src = image->content; //不同的图像颜色格式定位不同
 /*---------------------------------------------------------------*/
 
 	int alpha;
-	int ww;
-
+	int ww = image->line_byte;
 	if(image->color_type == FB_COLOR_RGB_8880) /*lab3: jpg*/
 	{
-
-		src = image->content;
 		for(int i = 0; i < h; i++) {
-			memcpy(dst, src, image->line_byte);
-			dst += SCREEN_WIDTH * 4;
-			src += image -> line_byte;
+			memcpy(dst, src, w << 2);
+			dst += SCREEN_WIDTH << 2;
+			src += ww;
 		}
 		return;
 	}
 	else if(image->color_type == FB_COLOR_RGBA_8888) /*lab3: png*/
 	{
-		
+		char *start = dst;
+		for(int j = 0; j < h; j++) {
+			dst = start;
+			start += SCREEN_WIDTH << 2;
+			for(int i = 0; i < w; i++) {
+				alpha = *(src + 3);
+				*(dst + 3) = alpha;
+				char r = *(src + 2);
+				char g = *(src + 1);
+				char b = *src;
+				switch(alpha) {
+					case 0:
+						break;
+					case 255:
+						*dst = b;
+						*(dst + 1) = g;
+						*(dst + 2) = r;
+					default:
+						*dst += ((b - *dst) * alpha) >> 8;
+						*(dst + 1) += ((g - *(dst + 1)) * alpha) >> 8;
+						*(dst + 2) += ((r - *(dst + 2)) * alpha) >> 8;
+				}
+				src += 4;
+				dst += 4;
+			}
+		}
 		return;
 	}
 	else if(image->color_type == FB_COLOR_ALPHA_8) /*lab3: font*/
 	{
-		printf("you need implement fb_draw_image() FB_COLOR_ALPHA_8\n"); exit(0);
-
-		return;
+		char *start = dst;
+		char r = (color >> 16) & 0xFF;
+		char g = (color >> 8) & 0xFF;
+		char b = color & 0xFF;
+		for(int j = 0; j < h; j++) {
+			dst = start;
+			start += SCREEN_WIDTH << 2;
+			for(int i = 0; i < w; i++) {
+				alpha = *src;
+				*(dst + 3) = alpha;
+				switch(alpha) {
+					case 0:
+						break;
+					case 255:
+						*dst = b;
+						*(dst + 1) = g;
+						*(dst + 2) = r;
+					default:
+						*dst += ((b - *dst) * alpha) >> 8;
+						*(dst + 1) += ((g - *(dst + 1)) * alpha) >> 8;
+						*(dst + 2) += ((r - *(dst + 2)) * alpha) >> 8;
+				}
+				src++;
+				dst += 4;
+			}
+		}
 	}
 /*---------------------------------------------------------------*/
 	return;
@@ -311,7 +356,7 @@ void fb_draw_text(int x, int y, char *text, int font_size, int color)
 		if(img == NULL) break;
 		fb_draw_image(x+info.left, y-info.top, img, color);
 		fb_free_image(img);
-
+		
 		x += info.advance_x;
 		i += info.bytes;
 	}

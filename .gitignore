@@ -1,3 +1,7 @@
 common/graphic.o
 out/
 *.o
+common/graphic.o
+out/lab3
+out/test
+common/graphic.o
