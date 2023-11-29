@@ -288,6 +288,7 @@ void fb_draw_image(int x, int y, fb_image *image, int color)
 						*dst = b;
 						*(dst + 1) = g;
 						*(dst + 2) = r;
+						break;
 					default:
 						*dst += ((b - *dst) * alpha) >> 8;
 						*(dst + 1) += ((g - *(dst + 1)) * alpha) >> 8;
@@ -318,6 +319,7 @@ void fb_draw_image(int x, int y, fb_image *image, int color)
 						*dst = b;
 						*(dst + 1) = g;
 						*(dst + 2) = r;
+						break;
 					default:
 						*dst += ((b - *dst) * alpha) >> 8;
 						*(dst + 1) += ((g - *(dst + 1)) * alpha) >> 8;
