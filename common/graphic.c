@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <sys/mman.h>
 #include <string.h>
+#include <math.h>
 
 static int LCD_FB_FD;
 static int *LCD_FB_BUF = NULL;
@@ -365,3 +366,15 @@ void fb_draw_text(int x, int y, char *text, int font_size, int color)
 	return;
 }
 
+void fb_draw_circle(int x, int y, int radius, int color) {
+	int *buf = _begin_draw(x - radius, y - radius, radius << 1, radius << 1);
+	int upperJ = min(SCREEN_HEIGHT, y + radius);
+	for(int j = max(0, y - radius); j < upperJ; j++) {
+		int h = abs(j - y);
+		int l = sqrt(radius * radius - h * h);
+		int upperI = min(SCREEN_WIDTH, x + l);
+		for(int i = max(0, x - l); i < upperI; i++) {
+			buf[(j << SCREEN_WIDTH_BIT) | i] = color;
+		}
+	}
+}

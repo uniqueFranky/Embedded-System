@@ -2,6 +2,23 @@
 #include "../common/common.h"
 
 #define COLOR_BACKGROUND	FB_COLOR(0xff,0xff,0xff)
+#define RED	FB_COLOR(255,0,0)
+#define ORANGE	FB_COLOR(255,165,0)
+#define YELLOW	FB_COLOR(255,255,0)
+#define GREEN	FB_COLOR(0,255,0)
+#define CYAN	FB_COLOR(0,127,255)
+#define BLUE	FB_COLOR(0,0,255)
+#define PURPLE	FB_COLOR(139,0,255)
+#define WHITE   FB_COLOR(255,255,255)
+#define BLACK   FB_COLOR(0,0,0)
+
+#define RADIUS 60
+
+struct TouchState {
+	int x; // x == -1 means the touch is released
+	int y;
+} states[5];
+const int colorForFinger[5] = {BLUE, YELLOW, GREEN, ORANGE, PURPLE};
 
 static int touch_fd;
 static void touch_event_cb(int fd)
@@ -10,13 +27,18 @@ static void touch_event_cb(int fd)
 	type = touch_read(fd, &x,&y,&finger);
 	switch(type){
 	case TOUCH_PRESS:
-		printf("TOUCH_PRESS：x=%d,y=%d,finger=%d\n",x,y,finger);
+		fb_draw_circle(x, y, RADIUS, colorForFinger[finger]);
+		states[finger].x = x;
+		states[finger].y = y;
 		break;
 	case TOUCH_MOVE:
-		printf("TOUCH_MOVE：x=%d,y=%d,finger=%d\n",x,y,finger);
+		fb_draw_circle(states[finger].x, states[finger].y, RADIUS, COLOR_BACKGROUND);
+		fb_draw_circle(x, y, RADIUS, colorForFinger[finger]);
+		states[finger].x = x;
+		states[finger].y = y;
 		break;
 	case TOUCH_RELEASE:
-		printf("TOUCH_RELEASE：x=%d,y=%d,finger=%d\n",x,y,finger);
+		fb_draw_circle(states[finger].x, states[finger].y, RADIUS, COLOR_BACKGROUND);
 		break;
 	case TOUCH_ERROR:
 		printf("close touch fd\n");

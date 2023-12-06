@@ -103,6 +103,8 @@ void fb_draw_text(int x, int y, char *text, int font_size, int color);
 int touch_init(char *dev); /*返回touch_fd*/
 int touch_read(int touch_fd, int *x, int *y, int *finger);
 
+void fb_draw_circle(int x, int y, int radius, int color);
+
 /*=========================== board.c ===============================*/
 /*和硬件平台相关的函数*/
 void * board_video_get_addr(void);
